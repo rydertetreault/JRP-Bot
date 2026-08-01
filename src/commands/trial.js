@@ -8,6 +8,7 @@ const {
   MessageFlags,
 } = require('discord.js');
 const trials = require('../lib/trials');
+const voice = require('../lib/voice');
 const { isJudicial, denyNonJudicial, jrpEmbed, clamp, sendTranscript } = require('../lib/util');
 const config = require('../config');
 const { COLORS } = config;
@@ -170,6 +171,18 @@ module.exports = {
     const message = await interaction.fetchReply();
     trial.messageId = message.id;
     trial.channelId = message.channelId;
+
+    // The bailiff calls the court to order.
+    const firstMember = await interaction.guild.members.fetch(firstSide.id).catch(() => null);
+    voice
+      .speak(
+        check.voiceChannel,
+        `All rise! The J R P court is now in session, the honorable ` +
+          `${interaction.member.displayName} presiding. The ${flipWinner} has won the coin flip. ` +
+          `${firstMember?.displayName || 'the first party'}, you have two minutes for your ` +
+          `opening statement, beginning now.`
+      )
+      .catch((err) => console.error('TTS error:', err.message));
 
     // Two-minute timers for opening statements, then voting opens
     const t1 = setTimeout(async () => {

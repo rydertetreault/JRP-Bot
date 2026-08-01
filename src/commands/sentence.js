@@ -3,6 +3,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { computeSentence } = require('../lib/sentencing');
 const registry = require('../lib/registry');
+const voice = require('../lib/voice');
 const { isJudicial, denyNonJudicial, jrpEmbed, clamp, sendTranscript } = require('../lib/util');
 const { COLORS } = require('../config');
 

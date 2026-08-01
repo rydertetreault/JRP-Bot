@@ -2,6 +2,7 @@
 
 const { SlashCommandBuilder } = require('discord.js');
 const { oracleAnswers, oracleReasons, getRandom } = require('../lib/flavor');
+const voice = require('../lib/voice');
 const { jrpEmbed } = require('../lib/util');
 const { COLORS } = require('../config');
 
