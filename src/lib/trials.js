@@ -48,7 +48,7 @@ function endTrial(guildId) {
  * @param {string[]} judicialRoleIds
  * @returns {{ok: boolean, reason?: string, voiceChannel?: any, jurors?: any[]}}
  */
-function checkConditions(judge, jrpRoleId, judicialRoleIds) {
+function checkConditions(judge, jrpRoleId, judicialRoleIds, quorum = 3) {
   // Condition A — judicial figure in an active voice channel
   const voiceChannel = judge.voice?.channel;
   if (!voiceChannel) {

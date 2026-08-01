@@ -34,6 +34,11 @@ module.exports = {
   // Members counted as "JRPs" for Article III quorum purposes.
   JRP_ROLE_ID: process.env.JRP_ROLE_ID || '1261610967717122110',
 
+  // Jurors required besides the judge (Art. III §1.B as written says three;
+  // the court operates with a reduced bench by decree of the LORD).
+  // Default 1 → a trial works with just judge + 1 juror in VC.
+  TRIAL_QUORUM: parseInt(process.env.TRIAL_QUORUM || '1', 10),
+
   // Channels excluded from VC stat tracking (AFK etc.)
   VC_STATS_EXCLUDED_CHANNELS: (process.env.VC_STATS_EXCLUDED_CHANNELS || '944297000847954013') // 𝘼𝙁𝙆💤
     .split(',')

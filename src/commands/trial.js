@@ -97,7 +97,8 @@ module.exports = {
     const check = trials.checkConditions(
       interaction.member,
       config.JRP_ROLE_ID,
-      config.JUDICIAL_ROLE_IDS
+      config.JUDICIAL_ROLE_IDS,
+      config.TRIAL_QUORUM
     );
 
     if (!check.ok) {
