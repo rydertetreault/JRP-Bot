@@ -1,0 +1,19 @@
+{
+  "name": "jrp-bot",
+  "version": "2.0.0",
+  "description": "Jeff Ray P Discord bot — oracle, roasts, and the full JRP Bill of Rights justice system",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "deploy": "node src/deploy-commands.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5"
+  }
+}

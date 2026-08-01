@@ -1,0 +1,19 @@
+node_modules/
+
+# secrets — never commit, any variation
+.env
+.env.*
+*.env
+env.txt
+*token*
+*secret*
+
+# data
+jrp_registry.json
+jrp_docket.json
+jrp_vcstats.json
+
+# artifacts
+*.tmp
+*.zip
+discloud/
