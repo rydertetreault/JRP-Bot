@@ -1,21 +1,13 @@
 'use strict';
 
 /**
- * Article III — Trial engine.
+ * Article III — Trial engine. Jeff Ray presides.
  *
- * Lifecycle:
- *   /trial start  → verify Art. III §1 conditions:
- *       A. Judicial figure (invoker, 𝙅𝙍𝙋𝙨 role) is in an active voice channel.
- *       B. At least three JRPs, outside the judicial party, present in that VC.
- *       C. Evidence reminder (Art. II) — enforced socially, displayed in embed.
- *   → coin flip decides which side gives opening statements first (Art. III §2)
- *   → two-minute opening statement timers per side (Art. III §2)
- *   → jury (the JRPs in VC) votes guilty / not guilty via buttons
- *   → guilty verdict → judicial party issues sentence via /sentence,
- *     or the judge can veto & go straight to sentencing (Art. V §1).
- *
- * One active trial per guild at a time (the Bill contemplates a sole
- * judicial figure).
+ * The court convenes when any member calls a trial from a voice channel
+ * holding at least TRIAL_MIN_USERS humans (any role). Everyone present
+ * except the defendant is impaneled as a juror. Jeff Ray is the judge:
+ * he runs proceedings, breaks deadlocks, and executes sentencing on a
+ * guilty verdict.
  */
 
 const trials = new Map(); // guildId -> trial state
@@ -42,43 +34,34 @@ function endTrial(guildId) {
 }
 
 /**
- * Article III §1 condition check.
- * @param {import('discord.js').GuildMember} judge
- * @param {string} jrpRoleId
- * @param {string[]} judicialRoleIds
- * @returns {{ok: boolean, reason?: string, voiceChannel?: any, jurors?: any[]}}
+ * Check trial conditions: starter in a VC with at least minUsers humans.
+ * @param {import('discord.js').GuildMember} starter
+ * @param {number} minUsers — minimum humans (any role) in the VC
+ * @returns {{ok: boolean, reason?: string, voiceChannel?: any, humans?: any[]}}
  */
-function checkConditions(judge, jrpRoleId, judicialRoleIds, quorum = 3) {
-  // Condition A — judicial figure in an active voice channel
-  const voiceChannel = judge.voice?.channel;
+function checkConditions(starter, minUsers) {
+  const voiceChannel = starter.voice?.channel;
   if (!voiceChannel) {
     return {
       ok: false,
-      reason:
-        'Article III §1(A): the Judicial Figure must be present in an active voice channel.',
+      reason: 'The court convenes in voice. Join a voice channel to call a trial.',
     };
   }
 
-  // Condition B — three JRPs outside the judicial party present
-  // "outside of the judicial party" — the presiding judge IS the judicial party
-  // for this trial. In this server 𝙅𝙍𝙋𝙨 is both the member role and the judicial
-  // role, so we exclude only the presiding judge (and bots).
-  const jurors = [...voiceChannel.members.values()].filter(
-    (m) => !m.user.bot && m.id !== judge.id && m.roles.cache.has(jrpRoleId)
-  );
+  const humans = [...voiceChannel.members.values()].filter((m) => !m.user.bot);
 
-  if (jurors.length < 3) {
+  if (humans.length < minUsers) {
     return {
       ok: false,
       reason:
-        `Article III §1(B): three JRPs outside of the judicial party must be present. ` +
-        `Currently in ${voiceChannel}: ${jurors.length}.`,
+        `A trial requires at least ${minUsers} members present in the voice channel. ` +
+        `Currently in ${voiceChannel}: ${humans.length}.`,
       voiceChannel,
-      jurors,
+      humans,
     };
   }
 
-  return { ok: true, voiceChannel, jurors };
+  return { ok: true, voiceChannel, humans };
 }
 
 function coinFlip() {
