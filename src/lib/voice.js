@@ -58,9 +58,20 @@ async function ensureSession(voiceChannel) {
   sessions.set(guildId, s);
 
   player.on(AudioPlayerStatus.Idle, () => processQueue(guildId));
+  player.on('stateChange', (oldS, newS) => {
+    if (oldS.status !== newS.status) {
+      console.log(`[voice] player: ${oldS.status} -> ${newS.status}`);
+    }
+  });
   player.on('error', (err) => {
-    console.error('Audio player error:', err.message);
+    console.error('[voice] player error:', err.message);
     processQueue(guildId);
+  });
+
+  connection.on('stateChange', (oldS, newS) => {
+    if (oldS.status !== newS.status) {
+      console.log(`[voice] connection: ${oldS.status} -> ${newS.status}`);
+    }
   });
 
   connection.on(VoiceConnectionStatus.Disconnected, async () => {
