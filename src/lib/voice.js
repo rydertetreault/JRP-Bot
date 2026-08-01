@@ -57,7 +57,11 @@ async function ensureSession(voiceChannel) {
   s = { connection, player, queue: [], playing: false, idleTimer: null, channelId: voiceChannel.id };
   sessions.set(guildId, s);
 
-  player.on(AudioPlayerStatus.Idle, () => processQueue(guildId));
+  player.on(AudioPlayerStatus.Idle, (oldS) => {
+    const dur = oldS.resource?.playbackDuration ?? '?';
+    console.log(`[voice] finished resource after ${dur}ms of audio`);
+    processQueue(guildId);
+  });
   player.on('stateChange', (oldS, newS) => {
     if (oldS.status !== newS.status) {
       console.log(`[voice] player: ${oldS.status} -> ${newS.status}`);
@@ -126,13 +130,24 @@ function processQueue(guildId) {
   s.playing = true;
   if (s.idleTimer) clearTimeout(s.idleTimer);
 
-  try {
-    const resource = createAudioResource(next.url, { inlineVolume: false });
-    s.player.play(resource);
-  } catch (err) {
-    console.error('Error playing audio resource:', err.message);
-    processQueue(guildId);
-  }
+  // Fetch the audio in Node and pipe bytes to the player. Passing the URL
+  // straight to ffmpeg segfaults (static ffmpeg 7.x crashes on https
+  // inputs), so ffmpeg must only ever see piped stdin.
+  fetch(next.url)
+    .then((res) => {
+      if (!res.ok) throw new Error(`TTS fetch ${res.status}`);
+      return res.arrayBuffer();
+    })
+    .then((buf) => {
+      console.log(`[voice] playing resource: ${buf.byteLength} bytes fetched`);
+      const stream = Readable.from(Buffer.from(buf));
+      const resource = createAudioResource(stream, { inlineVolume: false });
+      s.player.play(resource);
+    })
+    .catch((err) => {
+      console.error('Error playing audio resource:', err.message);
+      processQueue(guildId);
+    });
 }
 
 /**
