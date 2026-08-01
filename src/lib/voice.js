@@ -20,6 +20,7 @@ const {
   NoSubscriberBehavior,
   entersState,
 } = require('@discordjs/voice');
+const { Readable } = require('stream');
 const { getAllAudioUrls } = require('google-tts-api');
 
 const IDLE_LEAVE_MS = 30 * 1000;
